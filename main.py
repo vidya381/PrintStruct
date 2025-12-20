@@ -84,6 +84,7 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--max-items", type=max_items_int, default=20, help="Limit items shown per directory (default: 20). Use --no-limit for unlimited.")
     ap.add_argument("--version", "-v", action="store_true", help="Display the version of the tool")
     ap.add_argument("--zip", nargs="?", default=None, const=get_unused_file_path(os.getcwd()), help="Create a zip file containing files under path (respects .gitignore and name defaults to a random ID)")
+    ap.add_argument("--output", "-o", nargs="?", default=None, const=get_unused_file_path(os.getcwd()), help="Save tree structure to file (defaults to random ID if no filename given)")
     ap.add_argument("--no-limit", action="store_true", help="Show all items regardless of count")
     return ap.parse_args()
 
@@ -284,15 +285,55 @@ def main() -> None:
     # If --no-limit is set, disable max_items
     max_items = None if args.no_limit else args.max_items
 
-    draw_tree(
-        root=root,
-        max_depth=args.max_depth,
-        show_all=args.all,
-        extra_ignores=args.ignore,
-        respect_gitignore=not args.no_gitignore,
-        gitignore_depth=args.gitignore_depth,
-        max_items=max_items,
-    )
+    # Handle file output
+    if args.output is not None:
+        # Determine filename
+        filename = args.output
+        if not filename.endswith('.txt'):
+            filename += '.txt'
+
+        # Check if file exists and prompt user
+        if os.path.exists(filename):
+            response = input(f"File '{filename}' already exists. Overwrite? (y/n): ").strip().lower()
+            if response != 'y':
+                print("Operation cancelled.")
+                return
+
+        # Capture stdout
+        output_buffer = io.StringIO()
+        original_stdout = sys.stdout
+        sys.stdout = output_buffer
+
+        # Generate tree (output goes to buffer)
+        draw_tree(
+            root=root,
+            max_depth=args.max_depth,
+            show_all=args.all,
+            extra_ignores=args.ignore,
+            respect_gitignore=not args.no_gitignore,
+            gitignore_depth=args.gitignore_depth,
+            max_items=max_items,
+        )
+
+        # Restore stdout
+        sys.stdout = original_stdout
+
+        # Write to file
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(output_buffer.getvalue())
+
+        print(f"Tree structure saved to: {filename}")
+    else:
+        # Normal stdout output
+        draw_tree(
+            root=root,
+            max_depth=args.max_depth,
+            show_all=args.all,
+            extra_ignores=args.ignore,
+            respect_gitignore=not args.no_gitignore,
+            gitignore_depth=args.gitignore_depth,
+            max_items=max_items,
+        )
 
     if args.zip is not None:        # if zipping is requested
         zip_project(
