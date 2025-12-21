@@ -15,6 +15,7 @@ import io
 import zipfile
 import random
 import tomllib
+import pyperclip
 
 
 BRANCH = "├─ "
@@ -84,6 +85,7 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--max-items", type=max_items_int, default=20, help="Limit items shown per directory (default: 20). Use --no-limit for unlimited.")
     ap.add_argument("--version", "-v", action="store_true", help="Display the version of the tool")
     ap.add_argument("--zip", nargs="?", default=None, const=get_unused_file_path(os.getcwd()), help="Create a zip file containing files under path (respects .gitignore and name defaults to a random ID)")
+    ap.add_argument("--copy", "-c", action="store_true", help="Copy tree output to clipboard")
     ap.add_argument("--no-limit", action="store_true", help="Show all items regardless of count")
     return ap.parse_args()
 
@@ -285,15 +287,45 @@ def main() -> None:
     # If --no-limit is set, disable max_items
     max_items = None if args.no_limit else args.max_items
 
-    draw_tree(
-        root=root,
-        max_depth=args.max_depth,
-        show_all=args.all,
-        extra_ignores=args.ignore,
-        respect_gitignore=not args.no_gitignore,
-        gitignore_depth=args.gitignore_depth,
-        max_items=max_items,
-    )
+    # Capture output if needed for clipboard
+    if args.copy:
+        output_buffer = io.StringIO()
+        original_stdout = sys.stdout
+        sys.stdout = output_buffer
+
+        draw_tree(
+            root=root,
+            max_depth=args.max_depth,
+            show_all=args.all,
+            extra_ignores=args.ignore,
+            respect_gitignore=not args.no_gitignore,
+            gitignore_depth=args.gitignore_depth,
+            max_items=max_items,
+        )
+
+        sys.stdout = original_stdout
+        tree_string = output_buffer.getvalue()
+
+        # Display in terminal
+        print(tree_string, end='')
+
+        # Copy to clipboard with error handling
+        try:
+            pyperclip.copy(tree_string)
+            print("✓ Tree copied to clipboard!", file=sys.stderr)
+        except Exception as e:
+            print(f"Warning: Could not copy to clipboard: {e}", file=sys.stderr)
+    else:
+        # Normal behavior - no clipboard
+        draw_tree(
+            root=root,
+            max_depth=args.max_depth,
+            show_all=args.all,
+            extra_ignores=args.ignore,
+            respect_gitignore=not args.no_gitignore,
+            gitignore_depth=args.gitignore_depth,
+            max_items=max_items,
+        )
 
     if args.zip is not None:        # if zipping is requested
         zip_project(
