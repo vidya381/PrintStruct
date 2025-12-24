@@ -2,8 +2,6 @@
 
 **A git-aware CLI tool to provide LLM context for coding projects by combining project files into a single file with a number of different formats to choose from.**
 
-<br>
-
 ## ✨ Features
 
 | Feature | Description |
@@ -11,12 +9,17 @@
 | 📊 **Project Tree Visualization** | Generate clean directory trees with customizable depth and formatting |
 | 🗜️ **Smart Zipping** | Create project archives that automatically respect `.gitignore` rules |
 | 🎯 **Flexible Filtering** | Control what's shown with custom ignore patterns, depth limits, and item caps |
-| 🔍 **Gitignore Integration** | Honor `.gitignore` files at any depth level, or disable entirely when needed |
+| 🔍 **Gitignore Integration** | Use `.gitignore` files at any depth level, or disable entirely when needed |
 | 📋 **Multiple Output Formats** | Export to files, copy to clipboard, or display with emoji icons |
 | 📁 **Directory-Only View** | Show just the folder structure without files for high-level overviews |
-| 📈 **Project Statistics** | Display file and folder counts at each directory level with summary mode |
+| 📈 **Project Summary** | Display file and folder counts at each directory level with summary mode |
 
-<br>
+## 🔥 The problems it solves:
+
+* sharing project structure in issues or pull requests
+* generating directory trees for documentation
+* pasting project layouts into LLMs
+* **converting entire codebases to a single json file using `.gitignore` for prompting LLMs.**
 
 ## 📦 Installation
 
@@ -124,7 +127,6 @@ pip install -U gitree
 
 Pip will automatically replace the older version with the latest release.
 
-<br>
 
 ## ⚙️ CLI Arguments
 
@@ -148,10 +150,6 @@ In addition to the directory path, the following options are available:
 | `--out [file]`, `-o` | Save tree structure to file. Example: `--out tree.txt` or `--out tree.md` for markdown format. |
 | `--copy`, `-c`      | Copy tree output to clipboard. |
 
-
-<br>
-
-<br>
 
 ## Installation (for Contributors)
 
@@ -181,11 +179,9 @@ For running directly from main without installing:
 python -m gitree.main
 ```
 
-<br>
 
 ## Contributions
 
-Issues and pull requests are welcome.
-Ideas that would fit well include improved formatting, colorized output, test coverage, and performance optimizations.
+This is **YOUR** tool. Issues and pull requests are welcome.
 
-Gitree is intentionally small and readable, so contributions that preserve simplicity are especially appreciated.
+Gitree is kept intentionally small and readable, so contributions that preserve simplicity are especially appreciated.
