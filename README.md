@@ -245,7 +245,6 @@ To export only the tree structure without file contents, use the `--no-contents`
 ```bash
 gitree --json output.json --no-contents
 ```
->>>>>>> main
 
 
 ## Installation (for Contributors)
