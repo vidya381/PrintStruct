@@ -199,8 +199,8 @@ In addition to the directory path, the following options are available:
 | Argument            | Description |
 |---------------------|-------------|
 | `--version`, `-v`   | Displays the installed version. |
-| `--max-depth`       | Limits recursion depth. Example: `--max-depth 1` shows only top-level files and folders. |
-| `--all`, `-a`       | Includes hidden files and directories. Does not override `.gitignore`. |
+| `--max-depth`           | Limits recursion depth. Example: `--depth 1` shows only top-level files and folders. |
+| `--hidden-items`    | Includes hidden files and directories. Does not override `.gitignore`. |
 | `--exclude`         | Patterns of files to exclude. Example: `--exclude *.pyc __pycache__`. |
 | `--exclude-depth`   | Limits depth for `--exclude` patterns. Example: `--exclude-depth 2` applies exclude rules only to first 2 levels. |
 | `--gitignore-depth` | Controls how deeply `.gitignore` files are discovered. Example: `--gitignore-depth 0` uses only the root `.gitignore`. |
