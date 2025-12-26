@@ -216,6 +216,9 @@ In addition to the directory path, the following options are available:
 | `--md [file]`       | Export tree as Markdown to specified file. Example: `--md tree.md`. |
 | `--output [file]`, `-o` | Save tree structure to file. Example: `--output tree.txt` or `--output tree.md` for markdown format. |
 | `--copy`, `-c`      | Copy tree output to clipboard. |
+| `--include`         | Patterns of files to include (used in interactive mode). Example: `--include *.py *.js`. |
+| `--include-file-type` | Include files of a specific type. Example: `--include-file-type json` or `--include-file-type .py`. Case-insensitive. |
+| `--include-file-types` | Include files of multiple types. Example: `--include-file-types png jpg json`. Case-insensitive. |
 | `--json [file]`     | Export tree as JSON to specified file. **By default, includes file contents** (up to 1MB per file). |
 | `--txt [file]`      | Export tree as text to specified file. **By default, includes file contents** (up to 1MB per file). |
 | `--md [file]`       | Export tree as Markdown to specified file. **By default, includes file contents** with syntax highlighting (up to 1MB per file). |

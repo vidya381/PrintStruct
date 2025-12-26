@@ -22,6 +22,8 @@ def build_tree_data(
     exclude_depth: Optional[int] = None,
     no_files: bool = False,
     whitelist: Optional[Set[str]] = None,
+    include_patterns: List[str] = None,
+    include_file_types: List[str] = None,
     include_contents: bool = True,
 ) -> Dict[str, Any]:
     """
@@ -74,6 +76,8 @@ def build_tree_data(
             max_items=max_items,
             exclude_depth=exclude_depth,
             no_files=no_files,
+            include_patterns=include_patterns,
+            include_file_types=include_file_types,
         )
 
         # Filter by whitelist
