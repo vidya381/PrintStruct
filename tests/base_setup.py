@@ -10,6 +10,7 @@ class BaseCLISetup(unittest.TestCase):
     Base class for CLI setup.
     Inherit from this class to create test classes with reusable setup
     """
+
     def setUp(self):
         # Create a temp project directory for each test
         self._tmpdir = tempfile.TemporaryDirectory()
@@ -18,9 +19,11 @@ class BaseCLISetup(unittest.TestCase):
         # Base project structure
         (self.root / "file.txt").write_text("hello")
 
+
     def tearDown(self):
         # Cleanup temp directory
         self._tmpdir.cleanup()
+
 
     def _run_cli(self, *args):
         """
