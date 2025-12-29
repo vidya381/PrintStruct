@@ -145,3 +145,76 @@ class TestListingFlags(unittest.TestCase):
             file_index < folder_index,
             msg=f"Expected file before folder. File at {file_index}, Folder at {folder_index}"
         )
+
+
+    def test_entry_point_include(self):
+        # Create a .gitignore to test that --include overrides it
+        (self.root / ".gitignore").write_text("*.py\n")
+        (self.root / "script.py").write_text("python")
+        (self.root / "data.json").write_text("{}")
+        (self.root / "folder").mkdir()
+        (self.root / "folder" / "test.py").write_text("test")
+
+        # Without --include, .py files should be ignored
+        result_without = self._run_cli()
+        self.assertNotIn("script.py", result_without.stdout)
+        self.assertNotIn("test.py", result_without.stdout)
+
+        # With --include *.py, .py files should be force-included despite gitignore
+        result = self._run_cli("--include", "*.py")
+
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertTrue(result.stdout.strip())
+        # Should force-include .py files (overriding gitignore)
+        self.assertIn("script.py", result.stdout)
+        self.assertIn("test.py", result.stdout)
+        # Should still show other files that pass normal filters
+        self.assertIn("file.txt", result.stdout)
+        self.assertIn("data.json", result.stdout)
+        self.assertIn("folder", result.stdout)
+
+
+    def test_entry_point_exclude(self):
+        # Create multiple file types
+        (self.root / "script.py").write_text("python")
+        (self.root / "data.json").write_text("{}")
+        (self.root / "readme.md").write_text("docs")
+        (self.root / "folder").mkdir()
+        (self.root / "folder" / "test.py").write_text("test")
+
+        # Test --exclude to hide .py files
+        result = self._run_cli("--exclude", "*.py")
+
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertTrue(result.stdout.strip())
+        # Should show non-.py files
+        self.assertIn("file.txt", result.stdout)
+        self.assertIn("data.json", result.stdout)
+        self.assertIn("readme.md", result.stdout)
+        self.assertIn("folder", result.stdout)
+        # Should NOT show .py files
+        self.assertNotIn("script.py", result.stdout)
+        self.assertNotIn("test.py", result.stdout)
+
+
+    def test_entry_point_exclude_multiple_patterns(self):
+        # Create various files
+        (self.root / "file.log").write_text("log")
+        (self.root / "cache.tmp").write_text("temp")
+        (self.root / "data.json").write_text("{}")
+        (self.root / "folder").mkdir()
+        (self.root / "folder" / "debug.log").write_text("debug")
+
+        # Test --exclude with multiple patterns
+        result = self._run_cli("--exclude", "*.log", "*.tmp")
+
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertTrue(result.stdout.strip())
+        # Should show files not matching exclude patterns
+        self.assertIn("file.txt", result.stdout)
+        self.assertIn("data.json", result.stdout)
+        self.assertIn("folder", result.stdout)
+        # Should NOT show excluded files
+        self.assertNotIn("file.log", result.stdout)
+        self.assertNotIn("cache.tmp", result.stdout)
+        self.assertNotIn("debug.log", result.stdout)
