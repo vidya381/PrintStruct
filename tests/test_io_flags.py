@@ -61,3 +61,25 @@ class TestIOFlags(unittest.TestCase):
 
         content = out_path.read_text()
         self.assertIn("file.txt", content)
+
+
+    def test_entry_point_init_config(self):
+        config_path = self.root / "config.json"
+
+        # Ensure config.json doesn't exist initially
+        self.assertFalse(config_path.exists(), "config.json should not exist before test")
+
+        result = self._run_cli("--init-config")
+
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertTrue(config_path.exists(), "config.json was not created")
+
+        # Verify it's valid JSON with expected keys
+        import json
+        with open(config_path) as f:
+            config = json.load(f)
+
+        # Check for some expected default keys
+        self.assertIn("max_items", config)
+        self.assertIn("emoji", config)
+        self.assertIn("hidden_items", config)
