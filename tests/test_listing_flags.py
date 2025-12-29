@@ -1,40 +1,8 @@
-import subprocess
-import sys
-import tempfile
-from pathlib import Path
-import unittest
 from gitree.constants.constant import FILE_EMOJI, EMPTY_DIR_EMOJI, NORMAL_DIR_EMOJI
+from tests.base_setup import BaseCLISetup
 
 
-class TestListingFlags(unittest.TestCase):
-    
-    def setUp(self):
-        # Create a temp project directory for each test
-        self._tmpdir = tempfile.TemporaryDirectory()
-        self.root = Path(self._tmpdir.name)
-
-        # Base project structure
-        (self.root / "file.txt").write_text("hello")
-
-
-    def tearDown(self):
-        # Cleanup temp directory
-        self._tmpdir.cleanup()
-
-
-    def _run_cli(self, *args):
-        """
-        Helper to run the CLI consistently.
-        - args: extra CLI arguments, e.g. "--max-depth 1"
-        """
-        return subprocess.run(
-            [sys.executable, "-m", "gitree.main", *args],
-            cwd=self.root,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        )
-
+class TestListingFlags(BaseCLISetup):
 
     @staticmethod
     def __build_name_with_emoji(file_name: str, emoji: str):
