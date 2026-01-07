@@ -16,7 +16,6 @@ class TestGeneralOptions(BaseCLISetup):
         - Running gitree with no arguments
         - Displaying version information (--version)
         - Enabling verbose logging (--verbose)
-        - Initializing the user config file (--init-config)
     """
 
     def test_no_arg(self):
@@ -93,25 +92,3 @@ class TestGeneralOptions(BaseCLISetup):
         self.assertIn("LOG", result.stdout,
             msg=self.failed_run_msg(args_str) +
                 f"Expected str 'LOG' not found in output: \n\n{result.stdout}")
-
-
-    def test_init_config(self):
-        """
-        Test if the user config is being created properly.
-        """
-
-        # Vars
-        args_str = "--init-config"
-        config_path = self.root / ".gitree/config.json"
-
-        # Test
-        result = self.run_gitree(args_str)
-
-        # Validate
-        self.assertEqual(result.returncode, 0,
-            msg=self.failed_run_msg(args_str) +
-            self.non_zero_exitcode_msg(result.returncode))
-
-        self.assertTrue(config_path.exists(),
-            msg=self.failed_run_msg(args_str) +
-            "config.json was not created")

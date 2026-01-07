@@ -164,13 +164,10 @@ class ParsingService:
     def _add_general_options(ctx: AppContext, ap: argparse.ArgumentParser):
         general = ap.add_argument_group("general options")
         
-        general.add_argument("-v", "--version", action="store_true", 
-            default=argparse.SUPPRESS, 
+        general.add_argument("-v", "--version", action="store_true",
+            default=argparse.SUPPRESS,
             help="Display the version number of the tool")
-        
-        general.add_argument("--init-config", action="store_true", 
-            default=argparse.SUPPRESS, help="Create a default config.json file")
-        
+
         general.add_argument("--config-user", action="store_true", 
             default=argparse.SUPPRESS, 
             help="Create a default config.json file in the current directory"

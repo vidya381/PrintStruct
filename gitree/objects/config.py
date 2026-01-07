@@ -90,7 +90,6 @@ class Config:
         return {
             # General Options
             "version": False,
-            "init_config": False,
             "config_user": False,
             "no_config": False,
             "verbose": False,
@@ -153,7 +152,6 @@ class Config:
         # Delete "system/cli only" keys from the config dict
         del config["no_printing"]
         del config["version"]
-        del config["init_config"]
         del config["no_config"]
         del config["config_user"]
 

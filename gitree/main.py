@@ -61,8 +61,8 @@ def main() -> None:
     config = ParsingService.parse_args(ctx)
 
 
-    # if general options used, they are executed here 
-    # Handles for --version, --init-config, --config-user, --no-config
+    # if general options used, they are executed here
+    # Handles for --version, --config-user, --no-config
     GeneralOptionsService.handle_args(ctx, config)
 
 
