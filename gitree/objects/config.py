@@ -26,9 +26,18 @@ class Config:
         self.cli: dict[str, Any] = vars(args)
 
 
+        # Disable user- and global-level configuration if --no-config is used
+        if hasattr(args, "no_config"):
+            self.user_cfg = {}
+            self.global_cfg = {}
+
+
     def _build_user_config(self) -> dict[str, Any]:
-        """ Returns a dict of the user config """
-        config_path = self._get_user_config_path()
+        """ 
+        Returns a dict of the user config, if available.
+        """
+
+        config_path = Config._get_user_config_path()
 
         # Make sure the configuration file has been setup
         if not os.path.exists(config_path): return {}
@@ -37,9 +46,40 @@ class Config:
             user_cfg = json.load(file)
 
         return user_cfg
+    
+
+    def _get(self, key: str) -> Any:
+        """
+        Returns the value of the key with the following precedence:
+
+        Precedence: CLI > user > global > defaults > fallback default
+        """
+
+        if key in self.cli:
+            return self.cli[key]
+        if key in self.user_cfg:
+            return self.user_cfg[key]
+        if key in self.global_cfg:
+            return self.global_cfg[key]
+        if key in self.defaults:
+            return self.defaults[key]
+        
+        raise KeyError      # If key was not in any of the dicts
 
 
-    def _build_default_config(self) -> dict[str, Any]:
+    def __getattr__(self, name: str) -> Any:
+        """
+        Allow attribute-style access:
+        cfg.max_items converted to cfg.get("max_items")
+        """
+        try:
+            return self._get(name)
+        except KeyError:
+            raise AttributeError(f"'Config' object has no attribute '{name}'")
+
+
+    @staticmethod
+    def _build_default_config() -> dict[str, Any]:
         """
         Returns the default configuration values.
 
@@ -85,28 +125,9 @@ class Config:
             "no_max_items": False,
             "no_max_entries": False,
 
-            # Inner tool behaviour control
+            # Inner tool control (not to be given to the user)
             "no_printing": False  
         }
-    
-
-    def _get(self, key: str) -> Any:
-        """
-        Returns the value of the key with the following precedence:
-
-        Precedence: CLI > user > global > defaults > fallback default
-        """
-
-        if key in self.cli:
-            return self.cli[key]
-        if key in self.user_cfg:
-            return self.user_cfg[key]
-        if key in self.global_cfg:
-            return self.global_cfg[key]
-        if key in self.defaults:
-            return self.defaults[key]
-        
-        raise KeyError      # If key was not in any of the dicts
     
 
     @staticmethod
@@ -124,20 +145,32 @@ class Config:
         """
         config_path = Config._get_user_config_path()
 
-        if config_path.exists():
-            ctx.logger.log(Logger.WARNING, f"config.json already exists at {config_path.absolute()}")
-            return
 
         # Get default config values
-        config = Config(ctx, argparse.Namespace()).defaults
+        config = Config._build_default_config()
+
+        # Delete "system/cli only" keys from the config dict
+        del config["no_printing"]
+        del config["version"]
+        del config["init_config"]
+        del config["no_config"]
+
 
         try:
+            # Override the config file if exists (useful for replacing corrupted config file)
+            if config_path.exists(): ctx.logger.log(Logger.WARNING, 
+                "Config file already exists. This will be overriden.")
+
+
             with open(config_path, 'w', encoding='utf-8') as f:
-                json.dump(config, f, indent=2, ensure_ascii=False)
+                json.dump(config, f, indent=4, ensure_ascii=False)
                 f.write('\n')
 
+
             ctx.logger.log(Logger.DEBUG, f"Created config.json at {config_path.absolute()}")
-            ctx.logger.log(Logger.DEBUG, "Edit this file to customize default settings for this project.")
+            ctx.logger.log(Logger.DEBUG, 
+                "Edit this file to customize default settings for this project.")
+
         except Exception as e:
             ctx.logger.log(Logger.ERROR, f"Could not create config.json: {e}")
 
@@ -161,9 +194,13 @@ class Config:
             if editor:
                 # Use user's preferred editor from environment
                 subprocess.run([editor, str(config_path)], check=True)
+
             else:
                 # Fall back to platform-specific default text editor
+                ctx.logger.log(Logger.WARNING, 
+                    "No text editor found, fallback to platform-specific editors")
                 system = platform.system()
+
 
                 if system == "Darwin":  # macOS
                     # Use -t flag to open in default text editor, not browser
@@ -178,25 +215,17 @@ class Config:
                             continue
                     else:
                         raise Exception("No suitable text editor found")
+                    
                 elif system == "Windows":
                     # Use notepad as default text editor
                     subprocess.run(["notepad", str(config_path)], check=True)
+
                 else:
-                    raise Exception(f"Unsupported platform: {system}")
+                    ctx.logger.log(Logger.ERROR, f"Unsupported platform: {system}")
 
         except Exception as e:
             ctx.logger.log(Logger.ERROR, f"Could not open editor: {e}")
             ctx.logger.log(Logger.ERROR, f"Please manually open: {config_path.absolute()}")
             ctx.logger.log(Logger.ERROR,
                 f"Or set your EDITOR environment variable to your preferred editor.")
-
-    def __getattr__(self, name: str) -> Any:
-        """
-        Allow attribute-style access:
-        cfg.max_items converted to cfg.get("max_items")
-        """
-        try:
-            return self._get(name)
-        except KeyError:
-            raise AttributeError(f"'Config' object has no attribute '{name}'")
         
